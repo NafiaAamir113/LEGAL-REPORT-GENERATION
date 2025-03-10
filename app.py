@@ -77,7 +77,9 @@ PINECONE_ENV = st.secrets["PINECONE_ENV"]
 TOGETHER_AI_API_KEY = st.secrets["TOGETHER_AI_API_KEY"]
 
 # ✅ Initialize Pinecone
-pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
+# pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
+pc = pinecone.Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
+
 
 # ✅ Define the index name
 INDEX_NAME = "lawdata-2-index"
