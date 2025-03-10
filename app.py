@@ -64,9 +64,8 @@ if query:
 
         Question: {query}
 
-        # Answer:"""
-        Answer (with legal references if applicable):"""
-
+        Answer:"""
+        
 
         # Query Together AI
         response = requests.post(
