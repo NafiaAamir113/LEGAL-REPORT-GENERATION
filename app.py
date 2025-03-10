@@ -36,7 +36,7 @@ if query:
 
         # ✅ Query Pinecone with error handling
         try:
-            search_results = index.query(vector=query_embedding, top_k=10, include_metadata=True)
+            search_results = index.query(vector=query_embedding, top_k=5, include_metadata=True)
         except Exception as e:
             st.error(f"❌ Pinecone query failed: {e}")
             st.stop()
