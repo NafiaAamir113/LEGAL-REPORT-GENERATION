@@ -61,12 +61,9 @@
 
 # st.markdown("🚀 Built with **Streamlit**, **Pinecone**, and **Llama-3.3-70B-Turbo** on **Together AI**.")
 
-
-
-
 import streamlit as st
 import requests
-import pinecone
+from pinecone import Pinecone
 import torch  
 from sentence_transformers import SentenceTransformer, CrossEncoder
 
@@ -78,20 +75,18 @@ PINECONE_API_KEY = st.secrets["PINECONE_API_KEY"]
 PINECONE_ENV = st.secrets["PINECONE_ENV"]
 TOGETHER_AI_API_KEY = st.secrets["TOGETHER_AI_API_KEY"]
 
-# ✅ Initialize Pinecone
-pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
+# ✅ Use Pinecone's new client-based approach
+pc = Pinecone(api_key=PINECONE_API_KEY)
 
 # ✅ Verify available indexes
-existing_indexes = pinecone.list_indexes()
-st.write("Available indexes:", existing_indexes)
-
 INDEX_NAME = "lawdata-2-index"
+existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
 if INDEX_NAME not in existing_indexes:
     st.error(f"❌ Pinecone index '{INDEX_NAME}' not found.")
     st.stop()
 
 # ✅ Initialize the index properly
-index = pinecone.Index(INDEX_NAME)
+index = pc.Index(INDEX_NAME)
 
 # ✅ Move models to GPU if available
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -143,6 +138,10 @@ if query:
             answer = response.json()["choices"][0]["message"]["content"]
 
             st.success("💡 AI Response:")
+            st.write(answer)
+
+st.markdown("🚀 Built with **Streamlit**, **Pinecone**, and **Llama-3.3-70B-Turbo** on **Together AI**.")
+
             st.write(answer)
 
 st.markdown("🚀 Built with **Streamlit**, **Pinecone**, and **Llama-3.3-70B-Turbo** on **Together AI**.")
