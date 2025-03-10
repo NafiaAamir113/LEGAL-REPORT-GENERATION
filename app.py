@@ -84,9 +84,12 @@ pc = pinecone.Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 # ✅ Define the index name
 INDEX_NAME = "lawdata-2-index"
 
-# ✅ Check if index exists before querying
-if INDEX_NAME not in pinecone.list_indexes():
-    st.error(f"❌ Pinecone index '{INDEX_NAME}' not found. Please check your Pinecone dashboard.")
+# # ✅ Check if index exists before querying
+# if INDEX_NAME not in pinecone.list_indexes():
+#     st.error(f"❌ Pinecone index '{INDEX_NAME}' not found. Please check your Pinecone dashboard.")
+#     st.stop()
+if INDEX_NAME not in [index_info["name"] for index_info in pc.list_indexes()]:
+    st.error(f"❌ Index '{INDEX_NAME}' not found.")
     st.stop()
 
 # ✅ Initialize Pinecone index correctly
