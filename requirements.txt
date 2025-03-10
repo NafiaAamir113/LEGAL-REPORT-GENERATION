@@ -5,4 +5,3 @@ torch
 sentence-transformers
 transformers
 scikit-learn
-cross-encoder
