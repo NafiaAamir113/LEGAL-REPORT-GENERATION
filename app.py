@@ -55,14 +55,18 @@ if query:
         context_text = "\n\n".join([r[0] for r in ranked_results[:5]])
 
         # Construct LLM prompt
-        prompt = f"""You are a legal assistant. Answer the question based on the retrieved legal documents.
+        # prompt = f"""You are a legal assistant. Answer the question based on the retrieved legal documents.
+        prompt = f"""You are a legal assistant. Given the retrieved legal documents, provide a detailed answer.
+
 
         Context:
         {context_text}
 
         Question: {query}
 
-        Answer:"""
+        # Answer:"""
+        Answer (with legal references if applicable):"""
+
 
         # Query Together AI
         response = requests.post(
