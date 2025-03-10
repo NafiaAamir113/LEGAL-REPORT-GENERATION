@@ -118,7 +118,7 @@ query = st.text_input("🔍 Enter your legal question:")
 
 if query:
     # Check for incomplete query
-    if len(query.split()) < 3:  # Simple heuristic for incomplete queries
+    if len(query.split()) < 4:  # Simple heuristic for incomplete queries
         st.warning("⚠️ Your query seems incomplete. Please provide more details.")
         st.stop()
 
