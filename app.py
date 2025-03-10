@@ -65,56 +65,59 @@
 import streamlit as st
 import requests
 import pinecone
-import torch  # ✅ Import torch to check for GPU
+import torch  
 from sentence_transformers import SentenceTransformer, CrossEncoder
 
-# ✅ Streamlit page configuration
+# ✅ Streamlit page config
 st.set_page_config(page_title="Legal RAG System", layout="wide")
 
-# ✅ Load API keys securely from Streamlit secrets
+# ✅ Load API keys securely
 PINECONE_API_KEY = st.secrets["PINECONE_API_KEY"]
 PINECONE_ENV = st.secrets["PINECONE_ENV"]
 TOGETHER_AI_API_KEY = st.secrets["TOGETHER_AI_API_KEY"]
 
 # ✅ Initialize Pinecone
 pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
+
+# ✅ Define the index name
 INDEX_NAME = "lawdata-2-index"
-index = pinecone.Index(INDEX_NAME)  # ✅ Correct way to access Pinecone index
+
+# ✅ Check if index exists before querying
+if INDEX_NAME not in pinecone.list_indexes():
+    st.error(f"❌ Pinecone index '{INDEX_NAME}' not found. Please check your Pinecone dashboard.")
+    st.stop()
+
+# ✅ Initialize Pinecone index correctly
+index = pinecone.Index(INDEX_NAME)
 
 # ✅ Move models to GPU if available
 device = "cuda" if torch.cuda.is_available() else "cpu"
 embedding_model = SentenceTransformer("BAAI/bge-large-en", device=device)
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2", device=device)
 
-# ✅ Check if Pinecone index exists
-if INDEX_NAME not in pinecone.list_indexes():
-    st.error(f"❌ Index '{INDEX_NAME}' not found.")
-    st.stop()
-
-# ✅ Streamlit UI
 st.title("📚 Legal Retrieval-Augmented Generation (RAG) System")
 query = st.text_input("🔍 Enter your legal question:")
 
 if query:
     with st.spinner("🔎 Searching..."):
-        # ✅ Convert query to vector
-        query_embedding = embedding_model.encode(query, convert_to_tensor=True).cpu().numpy()  # Efficient tensor conversion
+        # ✅ Encode query properly
+        query_embedding = embedding_model.encode(query, convert_to_tensor=True).cpu().numpy()
 
-        # ✅ Query Pinecone
+        # ✅ Query Pinecone with proper index reference
         search_results = index.query(vector=query_embedding, top_k=10, include_metadata=True)
 
         if search_results.get("matches"):
-            # ✅ Extract text chunks from search results
+            # ✅ Extract text chunks
             context_chunks = [match["metadata"]["text"] for match in search_results["matches"]]
 
             # ✅ Rerank results using CrossEncoder
             rerank_scores = reranker.predict([(query, chunk) for chunk in context_chunks])
 
-            # ✅ Sort results by reranking scores
+            # ✅ Sort results based on reranking scores
             ranked_results = sorted(zip(context_chunks, rerank_scores), key=lambda x: x[1], reverse=True)
             context_text = "\n\n".join([r[0] for r in ranked_results[:5]])
 
-            # ✅ Construct the final prompt
+            # ✅ Construct AI prompt
             prompt = f"""You are a legal assistant. Answer the question based on the retrieved legal documents.
 
             Context:
@@ -124,7 +127,7 @@ if query:
 
             Answer:"""
 
-            # ✅ Call Together AI for Llama-3 response
+            # ✅ Call Together AI
             response = requests.post(
                 "https://api.together.xyz/v1/chat/completions",
                 headers={"Authorization": f"Bearer {TOGETHER_AI_API_KEY}", "Content-Type": "application/json"},
@@ -133,7 +136,7 @@ if query:
                                    {"role": "user", "content": prompt}], "temperature": 0.2}
             )
 
-            # ✅ Parse AI response
+            # ✅ Parse response
             answer = response.json()["choices"][0]["message"]["content"]
 
             st.success("💡 AI Response:")
