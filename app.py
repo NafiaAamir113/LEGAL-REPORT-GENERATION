@@ -62,6 +62,8 @@
 # st.markdown("🚀 Built with **Streamlit**, **Pinecone**, and **Llama-3.3-70B-Turbo** on **Together AI**.")
 
 
+
+
 import streamlit as st
 import requests
 import pinecone
@@ -77,22 +79,18 @@ PINECONE_ENV = st.secrets["PINECONE_ENV"]
 TOGETHER_AI_API_KEY = st.secrets["TOGETHER_AI_API_KEY"]
 
 # ✅ Initialize Pinecone
-# pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
-pc = pinecone.Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
+pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 
+# ✅ Verify available indexes
+existing_indexes = pinecone.list_indexes()
+st.write("Available indexes:", existing_indexes)
 
-# ✅ Define the index name
 INDEX_NAME = "lawdata-2-index"
-
-# # ✅ Check if index exists before querying
-# if INDEX_NAME not in pinecone.list_indexes():
-#     st.error(f"❌ Pinecone index '{INDEX_NAME}' not found. Please check your Pinecone dashboard.")
-#     st.stop()
-if INDEX_NAME not in [index_info["name"] for index_info in pc.list_indexes()]:
-    st.error(f"❌ Index '{INDEX_NAME}' not found.")
+if INDEX_NAME not in existing_indexes:
+    st.error(f"❌ Pinecone index '{INDEX_NAME}' not found.")
     st.stop()
 
-# ✅ Initialize Pinecone index correctly
+# ✅ Initialize the index properly
 index = pinecone.Index(INDEX_NAME)
 
 # ✅ Move models to GPU if available
@@ -148,3 +146,5 @@ if query:
             st.write(answer)
 
 st.markdown("🚀 Built with **Streamlit**, **Pinecone**, and **Llama-3.3-70B-Turbo** on **Together AI**.")
+
+
